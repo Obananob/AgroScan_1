@@ -12,7 +12,7 @@ if uploaded_file:
 
     if st.button("Predict"):
         files = {"file": uploaded_file.getvalue()}
-        response = requests.post("http://localhost:8080/predict", files=files)
+        response = requests.post("http://localhost:8000/predict", files=files)
 
         if response.status_code == 200:
             result = response.json()
