@@ -15,15 +15,32 @@ st.title("🌿 AgroScan: AI-Powered Plant Disease Detection")
 
 ------------------ LOAD MODEL ------------------
 
-@st.cache_resource def load_cnn_model(): return tf.keras.models.load_model("plant_disease_model.keras")
+@st.cache_resource def load_cnn_model(): return tf.keras.models.load_model("agroscan_model.keras")
 
-@st.cache_resource def load_llm(): tokenizer = T5Tokenizer.from_pretrained("google/flan-t5-small") model = T5ForConditionalGeneration.from_pretrained("google/flan-t5-small") return tokenizer, model
+@st.cache_resource def load_llm(): tokenizer = T5Tokenizer.from_pretrained("google/flan-t5-small") 
+model = T5ForConditionalGeneration.from_pretrained("google/flan-t5-small") return tokenizer, model
 
 cnn_model = load_cnn_model() tokenizer, llm_model = load_llm() translator = Translator()
 
 ------------------ HELPER FUNCS ------------------
 
-def predict_disease(image): img = image.resize((160, 160)) img_array = np.expand_dims(np.array(img)/255.0, axis=0) prediction = cnn_model.predict(img_array)[0] class_names = ['Bacterial Spot', 'Early Blight', 'Late Blight', 'Healthy'] pred_index = np.argmax(prediction) return class_names[pred_index]
+def predict_disease(image): img = image.resize((160, 160)) img_array = np.expand_dims(np.array(img)/255.0, axis=0) prediction = cnn_model.predict(img_array)[0]
+CLASS_NAMES = [
+    "Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot",
+    "Corn_(maize)___Common_rust_",
+    "Corn_(maize)___healthy",
+    "Pepper,_bell___Bacterial_spot",
+    "Pepper,_bell___healthy",
+    "Potato___Late_blight",
+    "Potato___healthy",
+    "Tomato___Bacterial_spot",
+    "Tomato___Early_blight",
+    "Tomato___Late_blight",
+    "Tomato___Leaf_Mold",
+    "Tomato___Target_Spot",
+    "Tomato___healthy"
+]
+pred_index = np.argmax(prediction) return class_names[pred_index]
 
 def generate_treatment(disease, follow_up): prompt = f"What is the treatment for {disease} in tomato? Also consider: {follow_up}" inputs = tokenizer(prompt, return_tensors="pt") outputs = llm_model.generate(**inputs, max_new_tokens=100) return tokenizer.decode(outputs[0], skip_special_tokens=True)
 
