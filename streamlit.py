@@ -7,13 +7,13 @@ from googletrans import Translator
 from fpdf import FPDF 
 import io
 
------------------- INIT ------------------
+#------------------ INIT ------------------
 
 st.set_page_config(page_title="AgroScan: Plant Doctor", layout="centered")
 
 st.title("🌿 AgroScan: AI-Powered Plant Disease Detection")
 
------------------- LOAD MODEL ------------------
+#------------------ LOAD MODEL ------------------
 
 @st.cache_resource def load_cnn_model(): return tf.keras.models.load_model("agroscan_model.keras")
 
@@ -22,7 +22,7 @@ model = T5ForConditionalGeneration.from_pretrained("google/flan-t5-small") retur
 
 cnn_model = load_cnn_model() tokenizer, llm_model = load_llm() translator = Translator()
 
------------------- HELPER FUNCS ------------------
+#------------------ HELPER FUNCS ------------------
 
 def predict_disease(image): img = image.resize((160, 160)) img_array = np.expand_dims(np.array(img)/255.0, axis=0) prediction = cnn_model.predict(img_array)[0]
 CLASS_NAMES = [
@@ -48,7 +48,7 @@ def generate_pdf(disease, treatment): pdf = FPDF() pdf.add_page() pdf.set_font("
 
 def translate_text(text, lang): return translator.translate(text, dest=lang).text
 
------------------- UI ------------------
+#------------------ UI ------------------
 
 st.subheader("📷 Upload Leaf Image") img_file = st.file_uploader("Upload a photo of the leaf", type=["jpg", "jpeg", "png"])
 
