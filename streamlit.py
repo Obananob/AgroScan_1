@@ -15,16 +15,23 @@ st.title("🌿 AgroScan: AI-Powered Plant Disease Detection")
 
 #------------------ LOAD MODEL ------------------
 
-@st.cache_resource def load_cnn_model(): return tf.keras.models.load_model("agroscan_model.keras")
+@st.cache_resource 
+def load_cnn_model(): 
+return tf.keras.models.load_model("agroscan_model.keras")
 
-@st.cache_resource def load_llm(): tokenizer = T5Tokenizer.from_pretrained("google/flan-t5-small") 
+@st.cache_resource 
+def load_llm(): 
+tokenizer = T5Tokenizer.from_pretrained("google/flan-t5-small") 
 model = T5ForConditionalGeneration.from_pretrained("google/flan-t5-small") return tokenizer, model
 
 cnn_model = load_cnn_model() tokenizer, llm_model = load_llm() translator = Translator()
 
 #------------------ HELPER FUNCS ------------------
 
-def predict_disease(image): img = image.resize((160, 160)) img_array = np.expand_dims(np.array(img)/255.0, axis=0) prediction = cnn_model.predict(img_array)[0]
+def predict_disease(image): 
+img = image.resize((160, 160)) 
+img_array = np.expand_dims(np.array(img)/255.0, axis=0) 
+prediction = cnn_model.predict(img_array)[0]
 CLASS_NAMES = [
     "Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot",
     "Corn_(maize)___Common_rust_",
@@ -40,19 +47,31 @@ CLASS_NAMES = [
     "Tomato___Target_Spot",
     "Tomato___healthy"
 ]
-pred_index = np.argmax(prediction) return class_names[pred_index]
+pred_index = np.argmax(prediction) 
+return 
+class_names[pred_index]
 
-def generate_treatment(disease, follow_up): prompt = f"What is the treatment for {disease} in tomato? Also consider: {follow_up}" inputs = tokenizer(prompt, return_tensors="pt") outputs = llm_model.generate(**inputs, max_new_tokens=100) return tokenizer.decode(outputs[0], skip_special_tokens=True)
+def generate_treatment(disease, follow_up): 
+prompt = f"What is the treatment for {disease} in tomato? Also consider: {follow_up}" 
+inputs = tokenizer(prompt, return_tensors="pt") 
+outputs = llm_model.generate(**inputs, max_new_tokens=100) 
+return tokenizer.decode(outputs[0], skip_special_tokens=True)
 
-def generate_pdf(disease, treatment): pdf = FPDF() pdf.add_page() pdf.set_font("Arial", size=12) pdf.cell(200, 10, txt="AgroScan Diagnosis Report", ln=1, align="C") pdf.ln(10) pdf.multi_cell(0, 10, f"Disease: {disease}\n\nTreatment Advice: {treatment}") pdf_output = io.BytesIO() pdf.output(pdf_output) pdf_output.seek(0) return pdf_output
+def generate_pdf(disease, treatment): 
+pdf = FPDF() pdf.add_page() pdf.set_font("Arial", size=12) pdf.cell(200, 10, txt="AgroScan Diagnosis Report", ln=1, align="C") pdf.ln(10) pdf.multi_cell(0, 10, f"Disease: {disease}\n\nTreatment Advice: {treatment}") 
+pdf_output = io.BytesIO() pdf.output(pdf_output) 
+pdf_output.seek(0) return pdf_output
 
-def translate_text(text, lang): return translator.translate(text, dest=lang).text
+def translate_text(text, lang): 
+return 
+translator.translate(text, dest=lang).text
 
 #------------------ UI ------------------
 
 st.subheader("📷 Upload Leaf Image") img_file = st.file_uploader("Upload a photo of the leaf", type=["jpg", "jpeg", "png"])
 
-follow_up = st.text_input("🌱 Any specific concerns or follow-up questions?") language = st.selectbox("🌍 Preferred Language", ["English", "Yoruba", "Hausa", "Igbo"])
+follow_up = st.text_input("🌱 Any specific concerns or follow-up questions?") 
+language = st.selectbox("🌍 Preferred Language", ["English", "Yoruba", "Hausa", "Igbo"])
 
 if st.button("🔍 Diagnose") and img_file: image = Image.open(img_file) st.image(image, caption="Uploaded Leaf", use_column_width=True)
 
