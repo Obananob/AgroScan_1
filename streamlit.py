@@ -28,11 +28,18 @@ translator = Translator()
 
 # ------------------ HELPER FUNCS ------------------
 
+def preprocess_image(image, target_size=(160, 160)):
+    if image.mode != "RGB":
+        image = image.convert("RGB")
+    image = image.resize(target_size)
+    img_array = np.array(image) / 255.0
+    img_array = np.expand_dims(img_array, axis=0)
+    return img_array
+
 def predict_disease(image):
-    img = image.resize((160, 160))
-    img_array = np.expand_dims(np.array(img) / 255.0, axis=0)
+    img_array = preprocess_image(image)
     prediction = cnn_model.predict(img_array)[0]
-    
+
     CLASS_NAMES = [
         "Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot",
         "Corn_(maize)___Common_rust_",
@@ -48,7 +55,7 @@ def predict_disease(image):
         "Tomato___Target_Spot",
         "Tomato___healthy"
     ]
-    
+
     pred_index = np.argmax(prediction)
     return CLASS_NAMES[pred_index]
 
@@ -65,7 +72,7 @@ def generate_pdf(disease, treatment):
     pdf.cell(200, 10, txt="AgroScan Diagnosis Report", ln=1, align="C")
     pdf.ln(10)
     pdf.multi_cell(0, 10, f"Disease: {disease}\n\nTreatment Advice: {treatment}")
-    
+
     pdf_output = io.BytesIO()
     pdf.output(pdf_output)
     pdf_output.seek(0)
@@ -84,12 +91,12 @@ language = st.selectbox("🌍 Preferred Language", ["English", "Yoruba", "Hausa"
 if st.button("🔍 Diagnose") and img_file:
     image = Image.open(img_file)
     st.image(image, caption="Uploaded Leaf", use_column_width=True)
-    
+
     disease = predict_disease(image)
     st.success(f"🩺 Detected Disease: {disease}")
-    
+
     treatment = generate_treatment(disease, follow_up)
-    
+
     if language != "English":
         lang_code = language.lower()[:2]
         disease_translated = translate_text(disease, lang_code)
