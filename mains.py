@@ -11,13 +11,9 @@ from twilio.rest import Client
 from huggingface_hub import InferenceClient
 from twilio.twiml.messaging_response import MessagingResponse
 
-# -------------------- ENV SETUP --------------------
-load_dotenv()
-
-# -------------------- APP INIT --------------------
 app = FastAPI(title="AgroScan – Plant Disease Detector")
 
-# -------------------- MODEL LOAD --------------------
+# MODEL LOAD 
 MODEL = tf.keras.models.load_model("model/agroscan_model.keras")
 CLASS_NAMES = [
     "Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot",
@@ -35,37 +31,43 @@ CLASS_NAMES = [
     "Tomato___healthy"
 ]
 
-# -------------------- TWILIO INIT --------------------
+# TWILIO SETUP
+load_dotenv()
 TWILIO_SID = os.getenv("TWILIO_ACCOUNT_SID")
 TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
 twilio_client = Client(TWILIO_SID, TWILIO_AUTH_TOKEN)
 
-# -------------------- HUGGING FACE LLM --------------------
-HF_TOKEN = os.getenv("HF_TOKEN")
-HF_MODEL = "featherless-ai/LawToken-0.3B-v2"  # use a light model <1B
-hf_client = InferenceClient(model=HF_MODEL, token=HF_TOKEN)
+#  HUGGING FACE LLM 
+# HF_TOKEN = os.getenv("HF_TOKEN")
+# HF_MODEL = "featherless-ai/LawToken-0.3B-v2"  # use a light model <1B
+# hf_client = InferenceClient(model=HF_MODEL, token=HF_TOKEN)
 
-# -------------------- UTILS --------------------
+# UTILS 
+def preprocess_image(image: Image.Image):
+    image = image.resize((160, 160))
+    image = np.array(image) / 255.0
+    return np.expand_dims(image, axis=0)
+
 def read_file_as_image(data) -> np.ndarray:
     image = np.array(Image.open(BytesIO(data)))
     return image
 
-def generate_prompt(disease: str) -> str:
-    return (
-        f"Think carefully. A plant has been diagnosed with the disease: {disease}. "
-        f"What is a simple, actionable, and locally relevant treatment recommendation? "
-        f"Respond in the same language as the disease name."
-    )
+# def generate_prompt(disease: str) -> str:
+#     return (
+#         f"Think carefully. A plant has been diagnosed with the disease: {disease}. "
+#         f"What is a simple, actionable, and locally relevant treatment recommendation? "
+#         f"Respond in the same language as the disease name."
+#     )
 
-def get_treatment_recommendation(disease: str) -> str:
-    prompt = generate_prompt(disease)
-    try:
-        response = hf_client.text_generation(prompt=prompt, max_new_tokens=150, temperature=0.6)
-        return response.strip()
-    except Exception as e:
-        return f"⚠️ LLM Error: {str(e)}"
+# # def get_treatment_recommendation(disease: str) -> str:
+# #     prompt = generate_prompt(disease)
+# #     try:
+# #         response = hf_client.text_generation(prompt=prompt, max_new_tokens=150, temperature=0.6)
+# #         return response.strip()
+# #     except Exception as e:
+# #         return f"⚠️ LLM Error: {str(e)}"
 
-# -------------------- ENDPOINTS --------------------
+# ENDPOINTS 
 
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
@@ -84,28 +86,28 @@ async def predict(file: UploadFile = File(...)):
         "confidence": float(confidence)
     }
 
-@app.post("/treat")
-async def treat(file: UploadFile = File(...)):
-    image = read_file_as_image(await file.read())
-    img_batch = np.expand_dims(image, 0)
+# @app.post("/treat")
+# async def treat(file: UploadFile = File(...)):
+#     image = read_file_as_image(await file.read())
+#     img_batch = np.expand_dims(image, 0)
 
-    prediction = MODEL.predict(img_batch)
-    predicted_class = CLASS_NAMES[np.argmax(prediction[0])]
-    confidence = np.max(prediction[0])
+#     prediction = MODEL.predict(img_batch)
+#     predicted_class = CLASS_NAMES[np.argmax(prediction[0])]
+#     confidence = np.max(prediction[0])
 
-    if confidence < 0.7:
-        return {
-            "class": "Uncertain",
-            "confidence": float(confidence),
-            "treatment": "⚠️ Please upload a clearer image."
-        }
+#     if confidence < 0.7:
+#         return {
+#             "class": "Uncertain",
+#             "confidence": float(confidence),
+#            # "treatment": "⚠️ Please upload a clearer image."
+#         }
 
-    treatment = get_treatment_recommendation(predicted_class)
+#    treatment = get_treatment_recommendation(predicted_class)
 
     return {
         "class": predicted_class,
         "confidence": float(confidence),
-        "treatment": treatment
+       # "treatment": treatment
     }
 
 @app.post("/hook", response_class=PlainTextResponse)
@@ -126,6 +128,5 @@ async def whatsapp_hook(request: Request):
 def root():
     return {"message": "🌱 Welcome to AgroScan FastAPI backend!"}
 
-# -------------------- MAIN --------------------
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8080)
+    uvicorn.run(app, host="0.0.0.0", port=8000)

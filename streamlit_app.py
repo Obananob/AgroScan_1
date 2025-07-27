@@ -10,7 +10,7 @@ if uploaded_file:
     image = Image.open(uploaded_file)
     st.image(image, caption="Uploaded Image", use_container_width=True)
 
-    if st.button("Predict"):
+    if st.button("Detect"):
         files = {"file": uploaded_file.getvalue()}
         response = requests.post("http://localhost:8000/predict", files=files)
 

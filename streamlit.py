@@ -1,92 +1,73 @@
 import streamlit as st
 import requests
 from PIL import Image
-import base64
+import io
+from twilio.rest import Client
+import os
+from dotenv import load_dotenv
 
-# -------------------- PAGE CONFIG --------------------
-st.set_page_config(
-    page_title="AgroScan – Plant Disease Detector",
-    page_icon="🌿",
-    layout="centered"
-)
+load_dotenv()
 
-# -------------------- TITLE --------------------
-st.title("🌿 AgroScan – Smart Plant Doctor")
+FastAPI_URL = "http://localhost:8000/predict" 
 
-# -------------------- LANGUAGE TOGGLE --------------------
-language = st.selectbox("🌍 Select Language", ["English", "Yoruba", "Hausa", "Pidgin"])
+TWILIO_SID = os.getenv("TWILIO_ACCOUNT_SID")
+TWILIO_AUTH = os.getenv("TWILIO_AUTH_TOKEN")
+TWILIO_PHONE = os.getenv("TWILIO_PHONE_NUMBER")
 
-# -------------------- FILE UPLOADER --------------------
-uploaded_file = st.file_uploader("📷 Upload a plant leaf image", type=["jpg", "jpeg", "png"])
+twilio_client = Client(TWILIO_SID, TWILIO_AUTH)
+
+# STREAMLIT SETUP
+st.set_page_config(page_title="AgroScan", page_icon="🌿")
+st.title("🌿 AgroScan: Plant Disease Detector")
+st.markdown("Upload a leaf image to detect possible plant diseases and optionally send results via SMS.")
+
+#  IMAGE UPLOAD 
+uploaded_file = st.file_uploader("📷 Upload Leaf Image", type=["jpg", "jpeg", "png"])
 
 if uploaded_file:
     image = Image.open(uploaded_file)
-    st.image(image, caption="Uploaded Image", use_container_width=True)
+    st.image(image, caption="Uploaded Leaf", use_container_width=True)
 
-    if st.button("🔍 Predict Disease"):
-        with st.spinner("Analyzing image..."):
-            files = {"file": uploaded_file.getvalue()}
-            try:
-                response = requests.post("http://localhost:8000/predict", files=files)
-            except Exception as e:
-                st.error(f"Server connection failed: {e}")
-                st.stop()
+    img_bytes = io.BytesIO()
+    image.save(img_bytes, format="PNG")
+    img_bytes.seek(0)
 
-        if response.status_code == 200:
-            result = response.json()
-            disease = result['class']
-            confidence = result['confidence']
-            st.success(f"✅ Disease: **{disease}**")
-            st.info(f"🔎 Confidence: **{confidence*100:.2f}%**")
+    #PREDICTION 
+    with st.spinner("🔍 Analyzing image..."):
+        response = requests.post(
+            FastAPI_URL,
+            files={"file": ("leaf.png", img_bytes, "image/png")}
+        )
 
-            # -------------------- TREATMENT ADVICE --------------------
-            with st.spinner("Fetching treatment recommendation..."):
-                advice_payload = {"disease": disease, "language": language}
-                advice_response = requests.post("http://localhost:8000/treatment", json=advice_payload)
+    if response.status_code == 200:
+        result = response.json()
+        st.success(f"✅ Disease Detected: **{result['class']}**")
+        st.info(f"🧪 Confidence: `{result['confidence']:.2f}`")
 
-            if advice_response.status_code == 200:
-                advice = advice_response.json()["advice"]
-                st.markdown(f"💊 **Treatment Advice:**\n\n{advice}")
-            else:
-                st.warning("⚠️ Could not fetch treatment advice.")
-
-            # -------------------- FOLLOW-UP QUESTION --------------------
-            with st.expander("💬 Ask a follow-up question"):
-                user_question = st.text_input("🧠 Ask the plant doctor:")
-                if st.button("Submit Question"):
-                    follow_up_payload = {"question": user_question, "disease": disease}
-                    follow_up_response = requests.post("http://localhost:8000/ask", json=follow_up_payload)
-
-                    if follow_up_response.status_code == 200:
-                        reply = follow_up_response.json()["response"]
-                        st.markdown(f"🤖 **AgroScan says:** {reply}")
-                    else:
-                        st.error("❌ Follow-up failed. Try again later.")
-
-            # -------------------- PDF DOWNLOAD --------------------
-            with st.spinner("Preparing your report..."):
-                pdf_payload = {
-                    "disease": disease,
-                    "confidence": confidence,
-                    "advice": advice,
-                    "language": language,
-                    "image_bytes": base64.b64encode(uploaded_file.getvalue()).decode("utf-8")
-                }
-                pdf_response = requests.post("http://localhost:8000/generate-pdf", json=pdf_payload)
-
-            if pdf_response.status_code == 200:
-                st.download_button(
-                    "📥 Download Report",
-                    pdf_response.content,
-                    file_name="AgroScan_Report.pdf"
-                )
-            else:
-                st.error("📄 Failed to generate PDF.")
-
-            # -------------------- WHATSAPP SHARE --------------------
-            whatsapp_text = f"AgroScan detected *{disease}* with {confidence*100:.2f}% confidence.\nAdvice: {advice}"
-            whatsapp_url = f"https://wa.me/?text={whatsapp_text.replace(' ', '%20')}"
-            st.markdown(f"[📤 Share on WhatsApp]({whatsapp_url})")
-
+        if result["class"].lower() == "uncertain":
+            st.warning("⚠️ Unable to confidently identify the disease. Try a clearer image.")
         else:
-            st.error("❌ Prediction failed. Ensure your FastAPI server is running.")
+            #  SMS SECTION 
+            st.markdown("### 📱 Send Diagnosis via SMS")
+            phone_number = st.text_input("Enter recipient phone number (e.g. +234...)", max_chars=15)
+
+            if st.button("Send SMS"):
+                sms_text = (
+                    f"🌿 AgroScan Diagnosis:\n"
+                    f"Disease: {result['class']}\n"
+                    f"Confidence: {result['confidence']:.2f}"
+                )
+                try:
+                    twilio_client.messages.create(
+                        body=sms_text,
+                        from_=TWILIO_PHONE,
+                        to=phone_number
+                    )
+                    st.success("✅ SMS sent successfully!")
+                except Exception as e:
+                    st.error(f"❌ SMS failed: {str(e)}")
+    else:
+        st.error("❌ Error processing image. Please try again.")
+
+#  FOOTER
+st.caption("AgroScan powered by FastAPI, TensorFlow, and Twilio 🌍")
