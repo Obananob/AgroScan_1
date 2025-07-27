@@ -8,8 +8,14 @@ from fpdf import FPDF
 import io
 
 # ------------------ INIT ------------------
+# Load logo
+logo = Image.open("logo.png")
+
+# Display in header
+st.image(logo, width=120)
+st.title("AgroScan: AI-Powered Plant Disease Diagnosis")
 st.set_page_config(page_title="AgroScan: Plant Doctor", layout="centered")
-st.title("🌿 AgroScan: AI-Powered Plant Disease Detection")
+st.title("🌿 AgroScan: AI-Powered Plant Disease Diagnosis")
 
 # ------------------ LOAD MODEL ------------------
 @st.cache_resource
