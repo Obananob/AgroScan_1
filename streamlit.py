@@ -89,7 +89,7 @@ def generate_pdf(disease, treatment):
     pdf.multi_cell(0, 10, f"Disease: {disease}\n\nTreatment Advice: {treatment}")
 
     pdf_output = io.BytesIO()
-    pdf.output(pdf_output)
+    pdf.output(pdf_output, 'S')
     pdf_output.seek(0)
     return pdf_output
 
