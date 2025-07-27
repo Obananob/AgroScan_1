@@ -71,7 +71,6 @@ def generate_treatment(disease, follow_up):
     prompt = f"""You are an expert crop doctor. 
 A plant has the disease: '{disease}'.
 Provide short, actionable treatment advice for farmers.
-Do NOT talk about human food or eating habits.
 List organic and chemical solutions only.""" Consider: {follow_up}"
     inputs = tokenizer(prompt, return_tensors="pt")
     outputs = llm_model.generate(**inputs, max_new_tokens=100)
@@ -113,7 +112,7 @@ language = st.selectbox("🌍 Preferred Language", ["English", "Yoruba", "Hausa"
 
 if st.button("🔍 Diagnose") and img_file:
     image = Image.open(img_file)
-    st.image(image, caption="Uploaded Leaf", use_column_width=True)
+    st.image(image, caption="Uploaded Leaf", use_container_width=True)
 
     disease = predict_disease(image)
     st.success(f"🩺 Detected Disease: {disease}")
