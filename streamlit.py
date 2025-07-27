@@ -39,30 +39,31 @@ def preprocess_image(image, target_size=(160, 160)):
     if image.mode != "RGB":
         image = image.convert("RGB")
     image = image.resize(target_size)
-    img_array = np.array(image) / 255.0
-    img_array = np.expand_dims(img_array, axis=0)
-    return img_array
+    image = np.array(image) / 255.0
+    if image.shape[-1] == 4:  # Remove alpha if present
+        image = image[..., :3]
+    image = np.expand_dims(image, axis=0)
+    return image
+
+CLASS_NAMES = [
+    "Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot",
+    "Corn_(maize)___Common_rust_",
+    "Corn_(maize)___healthy",
+    "Pepper,_bell___Bacterial_spot",
+    "Pepper,_bell___healthy",
+    "Potato___Late_blight",
+    "Potato___healthy",
+    "Tomato___Bacterial_spot",
+    "Tomato___Early_blight",
+    "Tomato___Late_blight",
+    "Tomato___Leaf_Mold",
+    "Tomato___Target_Spot",
+    "Tomato___healthy"
+]
 
 def predict_disease(image):
     img_array = preprocess_image(image)
     prediction = cnn_model.predict(img_array)[0]
-
-    CLASS_NAMES = [
-        "Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot",
-        "Corn_(maize)___Common_rust_",
-        "Corn_(maize)___healthy",
-        "Pepper,_bell___Bacterial_spot",
-        "Pepper,_bell___healthy",
-        "Potato___Late_blight",
-        "Potato___healthy",
-        "Tomato___Bacterial_spot",
-        "Tomato___Early_blight",
-        "Tomato___Late_blight",
-        "Tomato___Leaf_Mold",
-        "Tomato___Target_Spot",
-        "Tomato___healthy"
-    ]
-
     pred_index = np.argmax(prediction)
     return CLASS_NAMES[pred_index]
 
@@ -76,14 +77,14 @@ def generate_pdf(disease, treatment):
     pdf = FPDF()
     pdf.add_page()
 
-    # Add logo
-    pdf.image("A_vector_graphic_logo_design_for_AgroScan_features.png", x=10, y=8, w=30)
+    try:
+        pdf.image("A_vector_graphic_logo_design_for_AgroScan_features.png", x=10, y=8, w=30)
+    except:
+        pass  # Skip if logo file not found
 
-    # Title
     pdf.set_font("Arial", "B", 16)
     pdf.cell(200, 40, "AgroScan Disease Report", ln=True, align="C")
 
-    # Body
     pdf.set_font("Arial", size=12)
     pdf.multi_cell(0, 10, f"Disease: {disease}\n\nTreatment Advice: {treatment}")
 
@@ -93,9 +94,13 @@ def generate_pdf(disease, treatment):
     return pdf_output
 
 def translate_text(text, lang):
-    return translator.translate(text, dest=lang).text
+    try:
+        return translator.translate(text, dest=lang).text
+    except Exception:
+        return text  # fallback if translation fails
 
 # ------------------ UI ------------------
+
 st.subheader("📷 Upload Leaf Image")
 img_file = st.file_uploader("Upload a photo of the leaf", type=["jpg", "jpeg", "png"])
 
@@ -116,7 +121,8 @@ if st.button("🔍 Diagnose") and img_file:
         disease_translated = translate_text(disease, lang_code)
         treatment_translated = translate_text(treatment, lang_code)
     else:
-        disease_translated, treatment_translated = disease, treatment
+        disease_translated = disease
+        treatment_translated = treatment
 
     st.markdown("### 💊 Treatment Advice")
     st.info(treatment_translated)
