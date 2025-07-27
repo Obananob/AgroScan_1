@@ -68,7 +68,11 @@ def predict_disease(image):
     return CLASS_NAMES[pred_index]
 
 def generate_treatment(disease, follow_up):
-    prompt = f"What is the treatment for {disease}? Consider: {follow_up}"
+    prompt = f"""You are an expert crop doctor. 
+A plant has the disease: '{disease}'.
+Provide short, actionable treatment advice for farmers.
+Do NOT talk about human food or eating habits.
+List organic and chemical solutions only.""" Consider: {follow_up}"
     inputs = tokenizer(prompt, return_tensors="pt")
     outputs = llm_model.generate(**inputs, max_new_tokens=100)
     return tokenizer.decode(outputs[0], skip_special_tokens=True)
@@ -78,7 +82,7 @@ def generate_pdf(disease, treatment):
     pdf.add_page()
 
     try:
-        pdf.image("A_vector_graphic_logo_design_for_AgroScan_features.png", x=10, y=8, w=30)
+        pdf.image("logo.png", x=10, y=8, w=30)
     except:
         pass  # Skip if logo file not found
 
