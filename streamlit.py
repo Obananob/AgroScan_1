@@ -68,10 +68,13 @@ def predict_disease(image):
     return CLASS_NAMES[pred_index]
 
 def generate_treatment(disease, follow_up):
-    prompt = f"""You are an expert crop doctor. 
-A plant has the disease: '{disease}'.
-Provide short, actionable treatment advice for farmers.
-List organic and chemical solutions only.""" Consider: {follow_up}"
+    prompt = f"""
+You are an agricultural expert assisting rural farmers. Given the plant disease: '{disease}', provide a clear, organic, low-cost treatment advice specifically for *plants*, not humans.
+
+Avoid medical equipment or non-farm tools. Only mention substances available to farmers (e.g., neem oil, copper spray, pruning techniques, etc.).
+
+Disease: {disease}
+Treatment advice: Consider: {follow_up}"""
     inputs = tokenizer(prompt, return_tensors="pt")
     outputs = llm_model.generate(**inputs, max_new_tokens=100)
     return tokenizer.decode(outputs[0], skip_special_tokens=True)
