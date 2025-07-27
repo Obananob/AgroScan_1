@@ -8,14 +8,15 @@ from fpdf import FPDF
 import io
 
 # ------------------ INIT ------------------
+
+st.set_page_config(page_title="AgroScan: Plant Doctor", layout="centered")
+
 # Load logo
 logo = Image.open("logo.png")
 
 # Display in header
 st.image(logo, width=120)
 st.title("AgroScan: AI-Powered Plant Disease Diagnosis")
-st.set_page_config(page_title="AgroScan: Plant Doctor", layout="centered")
-st.title("🌿 AgroScan: AI-Powered Plant Disease Diagnosis")
 
 # ------------------ LOAD MODEL ------------------
 @st.cache_resource
@@ -74,9 +75,16 @@ def generate_treatment(disease, follow_up):
 def generate_pdf(disease, treatment):
     pdf = FPDF()
     pdf.add_page()
+
+    # Add logo
+    pdf.image("A_vector_graphic_logo_design_for_AgroScan_features.png", x=10, y=8, w=30)
+
+    # Title
+    pdf.set_font("Arial", "B", 16)
+    pdf.cell(200, 40, "AgroScan Disease Report", ln=True, align="C")
+
+    # Body
     pdf.set_font("Arial", size=12)
-    pdf.cell(200, 10, txt="AgroScan Diagnosis Report", ln=1, align="C")
-    pdf.ln(10)
     pdf.multi_cell(0, 10, f"Disease: {disease}\n\nTreatment Advice: {treatment}")
 
     pdf_output = io.BytesIO()
