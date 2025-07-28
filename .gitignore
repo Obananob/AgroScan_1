@@ -11,9 +11,7 @@ env/
 .env
 *.env
 
-# model files
-*.keras
-model/
+
 
 # streamlit cache
 .streamlit/

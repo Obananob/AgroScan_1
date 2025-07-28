@@ -11,10 +11,10 @@ from twilio.rest import Client
 from huggingface_hub import InferenceClient
 from twilio.twiml.messaging_response import MessagingResponse
 
-app = FastAPI(title="AgroScan – Plant Disease Detector")
+app = FastAPI(title="AgroScan – AI Powered Plant Doctor")
 
 # MODEL LOAD 
-MODEL = tf.keras.models.load_model("model/agroscan_model.keras")
+MODEL = tf.keras.models.load_model("agroscan_model.keras")
 CLASS_NAMES = [
     "Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot",
     "Corn_(maize)___Common_rust_",
