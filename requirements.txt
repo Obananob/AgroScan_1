@@ -2,3 +2,5 @@ Streamlit
 Tensorflow 
 numpy 
 Pillow 
+fastapi
+uvicorn
