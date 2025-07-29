@@ -43,7 +43,8 @@ def generate_pdf(disease, advice):
     pdf.cell(200, 10, txt=f"AgroScan Disease Report - {datetime.date.today()}", ln=True, align='C')
     pdf.ln(10)
     pdf.multi_cell(0, 10, f"Prediction: {disease}\n\nTreatment Advice: {advice}")
-    buffer = io.BytesIO()
+    pdf_data = pdf.output(dest ='S').encode(Latin)
+    buffer = io.BytesIO(pdf_data)
     pdf.output(buffer)
     buffer.seek(0)
     return buffer
