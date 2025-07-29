@@ -46,7 +46,24 @@ buffer.seek(0)
 return buffer
 
 
-def get_treatment_advice(disease): treatments = { "Bacterial Spot": "Remove affected leaves. Apply copper-based fungicide.", "Early Blight": "Use fungicides with chlorothalonil. Rotate crops.", "Late Blight": "Destroy infected plants. Apply mancozeb-based spray.", "Leaf Mold": "Ensure ventilation. Use sulfur-based fungicide.", "Septoria Leaf Spot": "Remove infected leaves. Use fungicides like azoxystrobin.", "Spider Mites": "Spray with neem oil. Control weeds nearby.", "Target Spot": "Apply fungicides and reduce leaf wetness.", "Yellow Leaf Curl Virus": "Control whiteflies. Use resistant varieties.", "Mosaic Virus": "Remove infected plants. Use virus-free seeds.", "Healthy": "No treatment needed. Continue good care." } return treatments.get(disease, "Consult an agricultural extension officer.")
+def get_treatment_advice(disease): treatments = {
+    "Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot": "Apply fungicides such as strobilurins or triazoles. Practice crop rotation and ensure proper field sanitation.",
+    "Corn_(maize)___Common_rust_": "Use resistant hybrids. Apply fungicides like tebuconazole if severity increases. Remove infected plant debris.",
+    "Corn_(maize)___healthy": "No disease detected. Maintain good agronomic practices.",
+    
+    "Pepper,_bell___Bacterial_spot": "Use copper-based bactericides. Avoid overhead irrigation. Remove infected plants and rotate crops.",
+    "Pepper,_bell___healthy": "No disease detected. Ensure adequate spacing and avoid water splash.",
+    
+    "Potato___Late_blight": "Use fungicides like chlorothalonil or mancozeb. Remove infected foliage. Store tubers in cool, dry places.",
+    "Potato___healthy": "Healthy plant. Maintain weed control and monitor for pests.",
+    
+    "Tomato___Bacterial_spot": "Use copper sprays. Avoid handling wet plants. Use certified disease-free seeds.",
+    "Tomato___Early_blight": "Apply fungicides like chlorothalonil or azoxystrobin. Use crop rotation and prune lower leaves.",
+    "Tomato___Late_blight": "Apply systemic fungicides immediately. Destroy infected plants. Monitor weather conditions.",
+    "Tomato___Leaf_Mold": "Improve air circulation. Use sulfur-based fungicides. Avoid wetting foliage.",
+    "Tomato___Target_Spot": "Apply fungicides like azoxystrobin. Avoid overwatering and maintain proper spacing.",
+    "Tomato___healthy": "No issues detected. Keep monitoring and maintain healthy soil."
+}
 
 
 st.set_page_config(page_title="AgroScan – AI-Powered Plant Disease Detector", layout="centered") st.title("\U0001F331 AgroScan – AI-Powered Plant Disease Detector") 
