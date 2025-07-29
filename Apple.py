@@ -1,16 +1,25 @@
 import streamlit as st
-import numpy as np
 import tensorflow as tf
+import numpy as np
 from PIL import Image
 from googletrans import Translator
 from fpdf import FPDF
 import io
 import datetime
 
-# --- Load model and class names ---
-model = tf.keras.models.load_model("agroscan_model.keras")
+# -------------------- APP CONFIG --------------------
+st.set_page_config(page_title="AgroScan – AI-Powered Plant Disease Detector", layout="centered")
+st.title("🌿 AgroScan – AI-Powered Plant Disease Detector")
+st.markdown("Upload a plant leaf image or take a photo to detect diseases using AI.")
 
-class_names = [
+# -------------------- MODEL & CLASSES --------------------
+@st.cache_resource
+def load_model():
+    return tf.keras.models.load_model("agroscan_model.keras")
+
+model = load_model()
+
+CLASS_NAMES = [
     "Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot",
     "Corn_(maize)___Common_rust_",
     "Corn_(maize)___healthy",
@@ -26,83 +35,83 @@ class_names = [
     "Tomato___healthy"
 ]
 
-translator = Translator()
-
-# --- Image Preprocessing ---
+# -------------------- IMAGE PREPROCESSING --------------------
 def preprocess_image(image):
-    image = image.resize((160, 160))
-    image = np.array(image) / 255.0
-    image = np.expand_dims(image, axis=0)
+    image = image.resize((160, 160))  # match training size
+    image = np.array(image) / 255.0   # normalize
+    if image.shape[-1] != 3:
+        image = np.stack((image,) * 3, axis=-1)  # ensure RGB
+    image = np.expand_dims(image, axis=0)       # add batch dimension
     return image
 
-# --- Generate PDF Report ---
+# -------------------- DISEASE TREATMENT ADVICE --------------------
+def get_treatment_advice(disease):
+    treatments = {
+        "Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot": "Apply strobilurins or triazoles. Practice crop rotation and good sanitation.",
+        "Corn_(maize)___Common_rust_": "Use resistant hybrids. Apply tebuconazole-based fungicide if needed.",
+        "Corn_(maize)___healthy": "No disease. Maintain good agronomic practices.",
+        "Pepper,_bell___Bacterial_spot": "Use copper-based bactericides. Avoid overhead watering. Rotate crops.",
+        "Pepper,_bell___healthy": "Healthy plant. Monitor for early signs.",
+        "Potato___Late_blight": "Apply chlorothalonil or mancozeb. Remove infected foliage.",
+        "Potato___healthy": "No disease. Maintain weed control and scout regularly.",
+        "Tomato___Bacterial_spot": "Use copper sprays. Avoid wet foliage. Start with clean seeds.",
+        "Tomato___Early_blight": "Apply azoxystrobin. Rotate crops and remove infected leaves.",
+        "Tomato___Late_blight": "Use systemic fungicides. Destroy infected plants quickly.",
+        "Tomato___Leaf_Mold": "Improve ventilation. Use sulfur-based sprays.",
+        "Tomato___Target_Spot": "Apply azoxystrobin. Avoid excessive watering.",
+        "Tomato___healthy": "Plant is healthy. Keep monitoring and maintain soil health."
+    }
+    return treatments.get(disease, "No treatment advice available.")
+
+# -------------------- PDF REPORT GENERATION --------------------
 def generate_pdf(disease, advice):
     pdf = FPDF()
     pdf.add_page()
     pdf.set_font("Arial", size=12)
-    pdf.cell(200, 10, txt=f"AgroScan Disease Report - {datetime.date.today()}", ln=True, align='C')
+    pdf.cell(200, 10, txt=f"AgroScan Report – {datetime.date.today()}", ln=True, align='C')
     pdf.ln(10)
-    pdf.multi_cell(0, 10, f"Prediction: {disease}\n\nTreatment Advice: {advice}")
-    pdf_data = pdf.output(dest ='S').encode('Latin-1')
-    buffer = io.BytesIO(pdf_data)
+    pdf.multi_cell(0, 10, f"Diagnosis: {disease}\n\nRecommended Treatment:\n{advice}")
+    pdf_output = pdf.output(dest='S').encode('latin-1')
+    buffer = io.BytesIO(pdf_output)
     buffer.seek(0)
     return buffer
 
-# --- Treatment Advice Logic ---
-def get_treatment_advice(disease):
-    treatments = {
-        "Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot": "Apply fungicides such as strobilurins or triazoles. Practice crop rotation and ensure proper field sanitation.",
-        "Corn_(maize)___Common_rust_": "Use resistant hybrids. Apply fungicides like tebuconazole if severity increases. Remove infected plant debris.",
-        "Corn_(maize)___healthy": "No disease detected. Maintain good agronomic practices.",
-        "Pepper,_bell___Bacterial_spot": "Use copper-based bactericides. Avoid overhead irrigation. Remove infected plants and rotate crops.",
-        "Pepper,_bell___healthy": "No disease detected. Ensure adequate spacing and avoid water splash.",
-        "Potato___Late_blight": "Use fungicides like chlorothalonil or mancozeb. Remove infected foliage. Store tubers in cool, dry places.",
-        "Potato___healthy": "Healthy plant. Maintain weed control and monitor for pests.",
-        "Tomato___Bacterial_spot": "Use copper sprays. Avoid handling wet plants. Use certified disease-free seeds.",
-        "Tomato___Early_blight": "Apply fungicides like chlorothalonil or azoxystrobin. Use crop rotation and prune lower leaves.",
-        "Tomato___Late_blight": "Apply systemic fungicides immediately. Destroy infected plants. Monitor weather conditions.",
-        "Tomato___Leaf_Mold": "Improve air circulation. Use sulfur-based fungicides. Avoid wetting foliage.",
-        "Tomato___Target_Spot": "Apply fungicides like azoxystrobin. Avoid overwatering and maintain proper spacing.",
-        "Tomato___healthy": "No issues detected. Keep monitoring and maintain healthy soil."
-    }
-    return treatments.get(disease, "No treatment advice available.")
+# -------------------- TRANSLATOR --------------------
+translator = Translator()
 
-# --- Streamlit UI ---
-st.set_page_config(page_title="AgroScan – AI-Powered Plant Disease Detector", layout="centered")
-st.title("\U0001F331 AgroScan – AI-Powered Plant Disease Detector")
-st.markdown("Upload a leaf image or use your camera. For best results, choose your back camera manually if on mobile.")
+# -------------------- STREAMLIT INTERFACE --------------------
+uploaded_file = st.file_uploader("📤 Upload Leaf Image", type=["jpg", "jpeg", "png"])
+camera_input = st.camera_input("📷 Or take a photo")
 
-image_file = st.file_uploader("Upload Leaf Image", type=["jpg", "jpeg", "png"])
-camera_input = st.camera_input("Or take a photo")
+if uploaded_file or camera_input:
+    image = Image.open(uploaded_file if uploaded_file else camera_input).convert("RGB")
+    st.image(image, caption="Analyzing this image...", use_column_width=True)
 
-if image_file or camera_input:
-    image = Image.open(image_file if image_file else camera_input)
-    st.image(image, caption="Uploaded Leaf Image", use_container_width=True)
+    with st.spinner("Processing..."):
+        processed = preprocess_image(image)
+        predictions = model.predict(processed)
+        predicted_index = np.argmax(predictions)
+        predicted_class = CLASS_NAMES[predicted_index]
+        confidence = float(np.max(predictions)) * 100
 
-    with st.spinner("Analyzing the image..."):
-        input_data = preprocess_image(image)
-        prediction = model.predict(input_data)
-        predicted_index = np.argmax(prediction)
-        predicted_class = class_names[predicted_index]
-        confidence = float(np.max(prediction)) * 100
-
-    st.success(f"**Detected:** {predicted_class} ({confidence:.2f}%)")
+    st.success(f"**Prediction:** {predicted_class}")
+    st.info(f"**Confidence:** {confidence:.2f}%")
 
     advice = get_treatment_advice(predicted_class)
-    st.info(f"**Advice:** {advice}")
+    st.markdown(f"**Treatment Advice:** {advice}")
 
-    # Translation
-    language = st.selectbox("Translate to language", ["English", "Hausa", "Yoruba", "Igbo", "French", "Arabic"])
-    if language != "English":
-        translated_advice = translator.translate(advice, dest=language.lower()).text
-        st.markdown(f"**Translated Advice ({language}):** {translated_advice}")
+    # Language translation
+    lang = st.selectbox("🌍 Translate to:", ["English", "French", "Arabic", "Hausa", "Yoruba", "Igbo"])
+    if lang != "English":
+        translated_text = translator.translate(advice, dest=lang.lower()).text
+        st.markdown(f"**Translated Advice ({lang}):** {translated_text}")
 
-    # PDF Report
-    if st.button("📄 Download PDF Report"):
-        pdf_buffer = generate_pdf(predicted_class, advice)
-        st.download_button(label="Download Report", data=pdf_buffer, file_name="agroscan_report.pdf", mime="application/pdf")
+    # PDF Download
+    if st.button("📄 Generate PDF Report"):
+        pdf = generate_pdf(predicted_class, advice)
+        st.download_button(label="Download Report", data=pdf, file_name="agroscan_report.pdf", mime="application/pdf")
 
-# --- Footer ---
+# -------------------- FOOTER --------------------
 st.markdown("---")
-st.markdown("Future Work & Roadmap: Offline mode | WhatsApp bot | Auto-treatment | Local language support | Farm dashboard")
-st.caption("© 2025 AgroScan | Built for Africa Deep Tech Challenge")
+st.markdown("**AgroScan Roadmap**: Offline AI | WhatsApp Bot | Multilingual Support | Smart Crop Advice")
+st.caption("© 2025 AgroScan | Built with ❤️ for African Farmers")
