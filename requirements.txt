@@ -4,3 +4,6 @@ numpy
 Pillow 
 fastapi
 uvicorn
+python-dotenv
+httpx
+pandas
