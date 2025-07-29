@@ -6,7 +6,6 @@ fastapi
 uvicorn
 python-dotenv
 Twilio
-hugging
 httpx
 pandas
 hugging_face_hub
