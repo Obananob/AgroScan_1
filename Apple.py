@@ -101,7 +101,7 @@ if image_file or camera_input:
     # PDF Report
     if st.button("📄 Download PDF Report"):
         pdf_buffer = generate_pdf(predicted_class, advice)
-        st.download_button("Download Report", data=pdf_buffer, file_name="agroscan_report.pdf", mime="application/pdf")
+        st.download_button(label="Download Report", data=pdf_buffer, file_name="agroscan_report.pdf", mime="application/pdf")
 
 # --- Footer ---
 st.markdown("---")
