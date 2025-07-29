@@ -11,7 +11,7 @@ import datetime
 # Constants
 MODEL_ZIP_PATH = "model.zip"
 EXTRACT_DIR = "unzipped_model"
-MODEL_PATH = os.path.join(EXTRACT_DIR, "agroscan_model.keras")
+MODEL_PATH = os.path.join(EXTRACT_DIR, "agroscan.keras")
 
 # Step 1 – Unzip the model
 if not os.path.exists(MODEL_PATH):
