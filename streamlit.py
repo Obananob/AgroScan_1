@@ -87,5 +87,5 @@ if image:
                 st.warning("Enter a valid phone number.")
 
 # --- Footer ---
-st.markdown(---)
+
 st.caption("**AgroScan by ByteBuilders** 🚀")
