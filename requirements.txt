@@ -7,5 +7,3 @@ uvicorn
 python-dotenv
 twilio
 httpx
-pandas
-hugging_face_hub
