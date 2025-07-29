@@ -2,10 +2,21 @@ import streamlit as st
 import tensorflow as tf
 import numpy as np
 from PIL import Image
+import zipfile
 from googletrans import Translator
 from fpdf import FPDF
 import io
 import datetime
+
+# Constants
+MODEL_ZIP_PATH = "model.zip"
+EXTRACT_DIR = "unzipped_model"
+MODEL_PATH = os.path.join(EXTRACT_DIR, "agroscan_model.keras")
+
+# Step 1 – Unzip the model
+if not os.path.exists(MODEL_PATH):
+    with zipfile.ZipFile(MODEL_ZIP_PATH, 'r') as zip_ref:
+        zip_ref.extractall(EXTRACT_DIR
 
 # -------------------- APP CONFIG --------------------
 st.set_page_config(page_title="AgroScan – AI-Powered Plant Disease Detector", layout="centered")
