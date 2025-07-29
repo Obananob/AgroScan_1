@@ -5,6 +5,8 @@ Pillow
 fastapi
 uvicorn
 python-dotenv
+Twilio
+hugging
 httpx
 pandas
-twilio
+hugging_face_hub
