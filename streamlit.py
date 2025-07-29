@@ -16,7 +16,7 @@ def load_model():
     return tf.keras.models.load_model("agroscan_model.keras")
 
 model = load_model()
-class_names = "Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot",
+class_names =    "Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot",
     "Corn_(maize)___Common_rust_",
     "Corn_(maize)___healthy",
     "Pepper,_bell___Bacterial_spot",
