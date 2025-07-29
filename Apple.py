@@ -16,7 +16,7 @@ MODEL_PATH = os.path.join(EXTRACT_DIR, "agroscan_model.keras")
 # Step 1 – Unzip the model
 if not os.path.exists(MODEL_PATH):
     with zipfile.ZipFile(MODEL_ZIP_PATH, 'r') as zip_ref:
-        zip_ref.extractall(EXTRACT_DIR
+        zip_ref.extractall(EXTRACT_DIR)
 
 # -------------------- APP CONFIG --------------------
 st.set_page_config(page_title="AgroScan – AI-Powered Plant Disease Detector", layout="centered")
@@ -26,7 +26,7 @@ st.markdown("Upload a plant leaf image or take a photo to detect diseases using 
 # -------------------- MODEL & CLASSES --------------------
 @st.cache_resource
 def load_model():
-    return tf.keras.models.load_model("agroscan_model.keras")
+    return tf.keras.models.load_model(MODEL_PATH)
 
 model = load_model()
 
