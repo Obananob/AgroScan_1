@@ -7,6 +7,7 @@ from googletrans import Translator
 from fpdf import FPDF
 import io
 import datetime
+import os
 
 # Constants
 MODEL_ZIP_PATH = "model.zip"
