@@ -6,14 +6,14 @@ import os
 from twilio.rest import Client
 
 # --- Title and Description ---
-st.title("AgroScan – Plant Disease Detector 🌿")
+st.title("🌿 AgroScan – Plant Disease Detector")
 st.markdown("Upload or snap a leaf image to detect the disease. Optionally, send the diagnosis via SMS.")
 st.markdown("---")
 
 # --- Load Model ---
 @st.cache_resource
 def load_model():
-    return tf.keras.models.load_model("model.keras")
+    return tf.keras.models.load_model("agroscan_model.keras")
 
 model = load_model()
 class_names = "Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot",
