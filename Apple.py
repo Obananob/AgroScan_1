@@ -45,7 +45,6 @@ def generate_pdf(disease, advice):
     pdf.multi_cell(0, 10, f"Prediction: {disease}\n\nTreatment Advice: {advice}")
     pdf_data = pdf.output(dest ='S').encode('Latin-1')
     buffer = io.BytesIO(pdf_data)
-    pdf.output(buffer)
     buffer.seek(0)
     return buffer
 
