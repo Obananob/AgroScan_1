@@ -16,7 +16,9 @@ def load_model():
     return tf.keras.models.load_model("agroscan_model.keras")
 
 model = load_model()
-class_names =    "Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot",
+
+class_names = [
+    "Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot",
     "Corn_(maize)___Common_rust_",
     "Corn_(maize)___healthy",
     "Pepper,_bell___Bacterial_spot",
@@ -34,7 +36,8 @@ class_names =    "Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot",
 
 # --- Image Preprocessing ---
 def preprocess_image(image):
-    img = image.resize((160, 160))  # Adapt to your model's input size
+    img = image.resize((160, 160))  
+
     img_array = np.array(img) / 255.0
     return np.expand_dims(img_array, axis=0)
 
