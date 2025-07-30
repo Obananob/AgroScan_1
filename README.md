@@ -88,4 +88,4 @@ uvicorn main:app --reload
 streamlit run app.py
 # This opens the AgroScan UI where users can upload an image,
 # receive diagnosis, and get an SMS notification.
-= To receive SMS notification you have to create a twilio account then copy your Twilio SID, AUTH TOKEN to your .env file
+# To receive SMS notification you have to create a twilio account then copy your Twilio SID, AUTH TOKEN to your .env file
