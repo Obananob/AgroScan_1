@@ -31,7 +31,8 @@ AgroScan is developed as part of the **Africa Deep Tech Challenge 2025**.
 2. The model classifies the disease (or identifies healthy leaves)
 3. The user receives instant diagnosis plus treatment advice
 4. SMS is sent to the farmer (via Twilio)
-   
+
+---
 ## 🧰 Tech Stack
 
 - Python
@@ -44,7 +45,10 @@ AgroScan is developed as part of the **Africa Deep Tech Challenge 2025**.
 - Github
 
 ---
+## Demo Video
+YouTube link - https://youtu.be/A26UjghBPvY?si=htANUpi3FVPVC9S-
 
+---
 ## 📊 Dataset
 
 The model is trained using the [PlantVillage Dataset](https://www.kaggle.com/datasets/emmarex/plantdisease), a labeled image dataset of healthy and diseased crop leaves.
