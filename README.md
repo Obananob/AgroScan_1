@@ -56,12 +56,12 @@ The model is trained using the [PlantVillage Dataset](https://www.kaggle.com/dat
 |-------------------------------|----------------------------|----------------------------------|---------------|
 | **Oni-Bashir Atiatunnasir Arike** | Team Lead / ML Engineer     | obananob91@gmail.com             | 09059624948   |
 | **Oladejo Luqman Kehinde**       | Backend Developer / DevOps | oladejoluqman6351@gmail.com      | 08163510869   |
-| **Abdulrasaq Yusuf Alabi**       | Frontend & QA Testing      | hollarmheeitconsult@gmail.com    | 07039137111   |
+| **Abdulrasaq Yusuf Alabi**       | Project Documentation      | hollarmheeitconsult@gmail.com    | 07039137111   |
 
 ## 📦 Installation (Dev Mode)
 
 ```bash
-git clone https://github.com/yourusername/agroscan.git
+git clone https://github.com/Obananob/AgroScan_1.git
 cd agroscan
 pip install -r requirements.txt
 Uvicorn main:app -- reload <--- fastAPI should be running to run streamlit app
