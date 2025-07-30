@@ -61,8 +61,21 @@ The model is trained using the [PlantVillage Dataset](https://www.kaggle.com/dat
 ## 📦 Installation (Dev Mode)
 
 ```bash
+# Setup environment
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+
+# clone the github repo
 git clone https://github.com/Obananob/AgroScan_1.git
+
+
 cd agroscan
+
+# install dependencies 
 pip install -r requirements.txt
-Uvicorn main:app -- reload <--- fastAPI should be running to run streamlit app
+
+# Run the FastAPI
+Uvicorn main:app -- reload <!--- fastAPI should be running to launch streamlit app and you can view swagger UI by putting/docs-->
+
+# Launch the streamlit app
 streamlit run app.py
