@@ -61,21 +61,27 @@ The model is trained using the [PlantVillage Dataset](https://www.kaggle.com/dat
 ## 📦 Installation (Dev Mode)
 
 ```bash
-# Setup environment
-python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
-
-# clone the github repo
+# Step 1: Clone the GitHub repository
 git clone https://github.com/Obananob/AgroScan_1.git
+cd AgroScan_1
 
+# Step 2: Create and activate a virtual environment
+python -m venv .venv
+# For Linux/macOS
+source .venv/bin/activate
+# For Windows
+.venv\Scripts\activate
 
-cd agroscan
-
-# install dependencies 
+# Step 3: Install required dependencies
 pip install -r requirements.txt
 
-# Run the FastAPI
-Uvicorn main:app -- reload <!--- fastAPI should be running to launch streamlit app and you can view swagger UI by putting/docs-->
+# Step 4: Start the FastAPI backend
+uvicorn main:app --reload
+# The FastAPI server will start at http://127.0.0.1:8000
+# Swagger UI is available at http://127.0.0.1:8000/docs
 
-# Launch the streamlit app
+# Step 5: In a new terminal, launch the Streamlit frontend
 streamlit run app.py
+# This opens the AgroScan UI where users can upload an image,
+# receive diagnosis, and get an SMS notification.
+= To receive SMS notification you have to create a twilio account then copy your Twilio SID, AUTH TOKEN to your .env file
