@@ -129,12 +129,12 @@ async def whatsapp_hook(request: Request):
 
         if content_type and content_type.startswith("image/"):
             try:
-                img_response = requests.get(media_url, auth=(TWILIO_SID, TWILIO_AUTH_TOKEN))
+                img_response = requests.get(media_url, auth=(TWILIOSID, TWILIOAUTHTOKEN))
                 if img_response.status_code != 200:
                     reply = "❌ Couldn't download the image. Please try again."
                 else:
-                    image = read_file_as_image(img_response.content)
-                    img_batch = preprocess_image(Image.fromarray(image))
+                    image = Image.open(BytesIO(img_response.content)).convert("RGB")
+                    img_batch = preprocess_image(image)
 
                     prediction = MODEL.predict(img_batch)
                     predicted_class = CLASS_NAMES[np.argmax(prediction[0])]
@@ -143,7 +143,7 @@ async def whatsapp_hook(request: Request):
                     if confidence < 0.7:
                         reply = "⚠️ Unable to confidently identify the disease. Please try a clearer image."
                     else:
-                        reply = f"🌿 Disease Detected: *{predicted_class}*\nConfidence: `{confidence:.2f}`"
+                        reply = f"🌿 Disease Detected: {predicted_class}\nConfidence: {confidence:.2f}"
             except Exception as e:
                 reply = f"❌ Error processing image: {str(e)}"
         else:
@@ -156,6 +156,7 @@ async def whatsapp_hook(request: Request):
 
     response.message(reply)
     return Response(content=str(response), media_type="application/xml")
+    
 @app.get("/")
 def root():
     return {"message": "🌱 Welcome to AgroScan FastAPI backend!"}
