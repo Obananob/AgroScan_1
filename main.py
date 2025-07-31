@@ -129,8 +129,8 @@ async def whatsapp_hook(request: Request):
     response = MessagingResponse()
 
     if num_media > 0:
-        media_url = data.get("MediaUrl0", [""])[0]
-        content_type = data.get("MediaContentType0", [""])[0]
+    media_url = data.get("MediaUrl0", [""])[0]
+    content_type = data.get("MediaContentType0", [""])[0]
 
     if content_type and content_type.startswith("image/"):
         try:
