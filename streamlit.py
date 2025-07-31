@@ -38,7 +38,7 @@ class_names = [
 def preprocess_image(image: Image.Image):
     image = image.resize((160, 160))
     image = np.array(image) / 255.0
-    return np.expand_dims(image, axis=0
+    return np.expand_dims(image, axis=0)
 
 def read_file_as_image(data) -> np.ndarray:
     image = np.array(Image.open(BytesIO(data)))
