@@ -47,9 +47,9 @@ AgroScan is developed as part of the **Africa Deep Tech Challenge 2025**.
 
 ---
 ## Demo Video
-[YouTube link](https://youtu.be/A26UjghBPvY?si=htANUpi3FVPVC9S-)
-[Streamlit URL](https://agroscan1-bytebuilders.streamlit.app)
-[FastAPI URL](https://agroscan1-production.up.railway.app)
+- [YouTube link](https://youtu.be/A26UjghBPvY?si=htANUpi3FVPVC9S-)
+- [Streamlit URL](https://agroscan1-bytebuilders.streamlit.app)
+- [FastAPI URL](https://agroscan1-production.up.railway.app)
 ---
 ## 📊 Dataset
 
