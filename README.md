@@ -33,6 +33,21 @@ AgroScan is developed as part of the **Africa Deep Tech Challenge 2025**.
 4. SMS is sent to the farmer (via Twilio)
 
 ---
+## Leaf Diseases Trained On
+- Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot
+- Corn_(maize)___Common_rust_
+- Corn_(maize)___healthy
+- Pepper,_bell___Bacterial_spot
+- Pepper,_bell___healthy
+- Potato___Late_blight
+- Potato___healthy
+- Tomato___Bacterial_spot
+- Tomato___Early_blight
+- Tomato___Late_blight
+- Tomato___Leaf_Mold
+- Tomato___Target_Spot
+- Tomato___healthy
+---
 ## 🧰 Tech Stack
 
 - Python
