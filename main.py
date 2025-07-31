@@ -155,7 +155,7 @@ async def whatsapp_hook(request: Request):
                 reply = "⚠️ Please send a valid image of a plant leaf."
                 else:
                     if "hi" in user_msg or "hello" in user_msg:                   
-                       reply = "👋 Welcome to AgroScan! Send me a plant leaf image and I’ll tell you if it’s sick and what to do.          
+                       reply = "👋 Welcome to AgroScan! Send me a plant leaf image and I’ll tell you if it’s sick and what to do."          
                       else:
                           reply = "📸 Please upload a clear plant leaf image for analysis."
                           
