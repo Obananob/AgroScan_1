@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-FastAPI_URL = "https://agroscan1-production.up.railway.app/docs#/default/predict_predict_post" 
+FastAPI_URL = "https://agroscan1-production.up.railway.app/predict" 
 
 TWILIO_SID = os.getenv("TWILIO_ACCOUNT_SID")
 TWILIO_AUTH = os.getenv("TWILIO_AUTH_TOKEN")
