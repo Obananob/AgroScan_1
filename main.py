@@ -7,6 +7,7 @@ import numpy as np
 from io import BytesIO
 from PIL import Image
 import tensorflow as tf
+import requests
 import os
 from dotenv import load_dotenv
 from twilio.rest import Client
