@@ -129,7 +129,7 @@ async def whatsapp_hook(request: Request):
 
         if content_type and content_type.startswith("image/"):
             try:
-                img_response = requests.get(media_url, auth=(TWILIOSID, TWILIOAUTHTOKEN))
+                img_response = requests.get(media_url, auth=("TWILIO_ACCOUNT_SID", "TWILIO_AUTH_TOKEN"))
                 if img_response.status_code != 200:
                     reply = "❌ Couldn't download the image. Please try again."
                 else:
