@@ -1,5 +1,7 @@
 from fastapi import FastAPI, UploadFile, File, Request
+from fastapi.responses import Response
 from fastapi.responses import PlainTextResponse, JSONResponse
+from urllib.parse import parse_qs
 import uvicorn
 import numpy as np
 from io import BytesIO
@@ -112,7 +114,8 @@ async def predict(file: UploadFile = File(...)):
 # Whatsapp webhook endpoint
 @app.post("/hook")
 async def whatsapp_hook(request: Request):
-    data = await request.form()
+    raw_body = await request.body()
+    data = parse_qs(raw_body.decode()
     user_msg = data.get("Body", "").strip().lower()
     num_media = int(data.get("NumMedia", 0))
 
