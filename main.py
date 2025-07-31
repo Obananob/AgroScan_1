@@ -129,11 +129,8 @@ async def whatsapp_hook(request: Request):
     response = MessagingResponse()
 
     if num_media > 0:
-        media_url = data.get("MediaUrl0", [""])[0]
-        content_type = data.get("MediaContentType0", [""])[0]
-
-    print("Media URL:", media_url)
-    print("Content Type:", content_type)
+    media_url = data.get("MediaUrl0", [""])[0]
+    content_type = data.get("MediaContentType0", [""])[0]
 
     if content_type and content_type.startswith("image/"):
         try:
@@ -156,7 +153,8 @@ async def whatsapp_hook(request: Request):
             reply = f"❌ Error processing image: {str(e)}"
     else:
         reply = "⚠️ Please send a valid image of a plant leaf."
-    elif "hi" in user_msg or "hello" in user_msg:
+else:
+    if "hi" in user_msg or "hello" in user_msg:
         reply = "👋 Welcome to AgroScan! Send me a plant leaf image and I’ll tell you if it’s sick and what to do."
     else:
         reply = "📸 Please upload a clear plant leaf image for analysis."
