@@ -64,7 +64,7 @@ The model is trained using the [PlantVillage Dataset](https://www.kaggle.com/dat
 | **Oladejo Luqman Kehinde**       | Backend Developer / DevOps | oladejoluqman6351@gmail.com      | 08163510869   |
 | **Abdulrasaq Yusuf Alabi**       | Project Documentation      | hollarmheeitconsult@gmail.com    | 07039137111   |
 
-## 📦 Installation (Dev Mode)
+## 📦 Installation
 
 ```bash
 # Step 1: Clone the GitHub repository
