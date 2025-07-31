@@ -8,7 +8,6 @@ import tensorflow as tf
 import os
 from dotenv import load_dotenv
 from twilio.rest import Client
-from huggingface_hub import InferenceClient
 from twilio.twiml.messaging_response import MessagingResponse
 
 app = FastAPI(title="AgroScan – AI Powered Plant Doctor")
