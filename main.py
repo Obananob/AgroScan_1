@@ -116,8 +116,15 @@ async def predict(file: UploadFile = File(...)):
 async def whatsapp_hook(request: Request):
     raw_body = await request.body()
     data = parse_qs(raw_body.decode())
-    user_msg = data.get("Body", "").strip().lower()
-    num_media = int(data.get("NumMedia", 0))
+
+    user_msg = data.get("Body", [""])[0].strip().lower()
+    num_media = int(data.get("NumMedia", ["0"])[0])
+
+    response = MessagingResponse()
+
+    if num_media > 0:
+        media_url = data.get("MediaUrl0", [""])[0]
+        content_type = data
 
     response = MessagingResponse()
 
