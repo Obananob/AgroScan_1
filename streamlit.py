@@ -1,94 +1,75 @@
 import streamlit as st
+import tensorflow as tf
 import numpy as np
 from PIL import Image
-import tensorflow as tf
-import os
+import io
 from twilio.rest import Client
+import os
+import requests
+from dotenv import load_dotenv
 
-# --- Title and Description ---
-st.title("🌿 AgroScan – Plant Disease Detector")
-st.markdown("Upload or snap a leaf image to detect the disease. Optionally, send the diagnosis via SMS.")
-st.markdown("---")
+load_dotenv()
 
-# --- Load Model ---
-@st.cache_resource
-def load_model():
-    return tf.keras.models.load_model("agroscan_model.keras")
+FastAPI_URL = "agroscan1-production.up.railway.app" 
 
-model = load_model()
+TWILIO_SID = os.getenv("TWILIO_ACCOUNT_SID")
+TWILIO_AUTH = os.getenv("TWILIO_AUTH_TOKEN")
+TWILIO_PHONE = os.getenv("TWILIO_PHONE_NUMBER")
 
-class_names = [
-    "Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot",
-    "Corn_(maize)___Common_rust_",
-    "Corn_(maize)___healthy",
-    "Pepper,_bell___Bacterial_spot",
-    "Pepper,_bell___healthy",
-    "Potato___Late_blight",
-    "Potato___healthy",
-    "Tomato___Bacterial_spot",
-    "Tomato___Early_blight",
-    "Tomato___Late_blight",
-    "Tomato___Leaf_Mold",
-    "Tomato___Target_Spot",
-    "Tomato___healthy"
-]
-  
+twilio_client = Client(TWILIO_SID, TWILIO_AUTH)
 
-# --- Image Preprocessing ---
-def preprocess_image(image: Image.Image):
-    image = image.resize((160, 160))
-    image = np.array(image) / 255.0
-    return np.expand_dims(image, axis=0)
+# STREAMLIT SETUP
+st.set_page_config(page_title="AgroScan", page_icon="🌿")
+st.title("🌿 AgroScan: Plant Disease Detector")
+st.markdown("Upload a leaf image to detect possible plant diseases and optionally send results via SMS.")
 
-def read_file_as_image(data) -> np.ndarray:
-    image = np.array(Image.open(BytesIO(data)))
-    return image
+#  IMAGE UPLOAD 
+uploaded_file = st.file_uploader("📷 Upload Leaf Image", type=["jpg", "jpeg", "png"])
 
-# --- Image Upload / Capture ---
-uploaded_image = st.file_uploader("Upload a leaf image", type=["jpg", "jpeg", "png"])
-camera_image = st.camera_input("Or take a picture")
-
-image = None
-if uploaded_image:
-    image = Image.open(uploaded_image)
-elif camera_image:
-    image = Image.open(camera_image)
-
-# --- Prediction ---
-if image:
+if uploaded_file:
+    image = Image.open(uploaded_file)
     st.image(image, caption="Uploaded Leaf", use_container_width=True)
-    with st.spinner("Analyzing the image..."):
-        processed = preprocess_image(image)
-        diagnosis = model.predict(processed)[0]
-        detected_class = class_names[np.argmax(diagnosis)]
-        confidence = round(100 * np.max(diagnosis), 2)
 
-    st.success(f"**Disease Detected**: {detected_class}")
-    st.info(f"**Confidence**: {confidence}%")
+    img_bytes = io.BytesIO()
+    image.save(img_bytes, format="PNG")
+    img_bytes.seek(0)
 
-    # --- Optional SMS ---
-    st.markdown("---")
-    st.markdown("### 📩 Send Diagnosis via SMS (optional)")
-    send_sms = st.checkbox("Send result via SMS")
-    
-    if send_sms:
-        phone_number = st.text_input("Recipient phone number (e.g. +234...)", max_chars=15)
-        if st.button("Send SMS"):
-            if phone_number:
+    #PREDICTION 
+    with st.spinner("🔍 Analyzing image..."):
+        response = requests.post(
+            FastAPI_URL,
+            files={"file": ("leaf.png", img_bytes, "image/png")}
+        )
+
+    if response.status_code == 200:
+        result = response.json()
+        st.success(f" Disease Detected: **{result['class']}**")
+        st.info(f"Confidence: `{result['confidence']:.2f}`")
+
+        if result["class"].lower() == "uncertain":
+            st.warning("⚠️ Unable to confidently identify the disease. Try a clearer image.")
+        else:
+            #  SMS SECTION 
+            st.markdown("### Send Diagnosis via SMS")
+            phone_number = st.text_input("Enter recipient phone number (e.g. +234...)", max_chars=15)
+
+            if st.button("Send SMS"):
+                sms_text = (
+                    f"🌿 AgroScan Diagnosis:\n"
+                    f"Disease: {result['class']}\n"
+                    f"Confidence: {result['confidence']:.2f}"
+                )
                 try:
-                    # Twilio Credentials from Streamlit secrets
-                    client = Client(st.secrets["TWILIO_SID"], st.secrets["TWILIO_AUTH"])
-                    message = client.messages.create(
-                        body=f"AgroScan Result: {detected_class} ({confidence}%)",
-                        from_=st.secrets["TWILIO_PHONE"],
+                    twilio_client.messages.create(
+                        body=sms_text,
+                        from_=TWILIO_PHONE,
                         to=phone_number
                     )
-                    st.success("SMS sent successfully ✅")
+                    st.success("SMS sent successfully!")
                 except Exception as e:
-                    st.error(f"Error sending SMS: {e}")
-            else:
-                st.warning("Enter a valid phone number.")
+                    st.error(f" SMS failed: {str(e)}")
+    else:
+        st.error("Error processing image. Please try again.")
 
-# --- Footer ---
-
-st.caption("**AgroScan by ByteBuilders** 🚀")
+#  FOOTER
+st.caption("AgroScan powered by FastAPI, TensorFlow, and Twilio 🌍")
