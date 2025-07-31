@@ -115,7 +115,7 @@ async def predict(file: UploadFile = File(...)):
 @app.post("/hook")
 async def whatsapp_hook(request: Request):
     raw_body = await request.body()
-    data = parse_qs(raw_body.decode()
+    data = parse_qs(raw_body.decode())
     user_msg = data.get("Body", "").strip().lower()
     num_media = int(data.get("NumMedia", 0))
 
