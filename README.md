@@ -22,7 +22,7 @@ AgroScan is developed as part of the **Africa Deep Tech Challenge 2025**.
 - Evaluation: Accuracy, Confusion Matrix, Precision/Recall
 - Streamlit frontend for real-time image upload and predictio
 - FastAPI backend to serve predictions and handle WhatsApp/SMS webhooks
-- Twilio integration for diagnosis alerts and treatment advice
+- Twilio integration for diagnosis and easy access
 
 ---
 ## 🖥️ How It Works
@@ -43,11 +43,13 @@ AgroScan is developed as part of the **Africa Deep Tech Challenge 2025**.
 - Streamlit
 - Railway
 - Github
+- Postman
 
 ---
 ## Demo Video
-YouTube link - https://youtu.be/A26UjghBPvY?si=htANUpi3FVPVC9S-
-
+[YouTube link](https://youtu.be/A26UjghBPvY?si=htANUpi3FVPVC9S-)
+[Streamlit URL](https://agroscan1-bytebuilders.streamlit.app)
+[FastAPI URL](https://agroscan1-production.up.railway.app)
 ---
 ## 📊 Dataset
 
