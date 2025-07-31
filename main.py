@@ -129,17 +129,21 @@ async def whatsapp_hook(request: Request):
     response = MessagingResponse()
 
     if num_media > 0:
-        media_url = data.get("MediaUrl0")
-        content_type = data.get("MediaContentType0")
+    media_url = data.get("MediaUrl0", [""])[0]
+    content_type = data.get("MediaContentType0", [""])[0]
 
-        if "image" in content_type:
-            try:
-                # Download the image from Twilio
-                img_response = requests.get(media_url)
+    print("Media URL:", media_url)
+    print("Content Type:", content_type)
+
+    if content_type and content_type.startswith("image/"):
+        try:
+            img_response = requests.get(media_url, auth=(TWILIO_SID, TWILIO_AUTH_TOKEN))
+            if img_response.status_code != 200:
+                reply = "❌ Couldn't download the image. Please try again."
+            else:
                 image = read_file_as_image(img_response.content)
                 img_batch = preprocess_image(Image.fromarray(image))
 
-                # Run prediction
                 prediction = MODEL.predict(img_batch)
                 predicted_class = CLASS_NAMES[np.argmax(prediction[0])]
                 confidence = np.max(prediction[0])
@@ -148,11 +152,10 @@ async def whatsapp_hook(request: Request):
                     reply = "⚠️ Unable to confidently identify the disease. Please try a clearer image."
                 else:
                     reply = f"🌿 Disease Detected: *{predicted_class}*\nConfidence: `{confidence:.2f}`"
-
-            except Exception as e:
-                reply = f"❌ Error processing image: {str(e)}"
-        else:
-            reply = "⚠️ Please send a valid image of a plant leaf."
+        except Exception as e:
+            reply = f"❌ Error processing image: {str(e)}"
+    else:
+        reply = "⚠️ Please send a valid image of a plant leaf."
     elif "hi" in user_msg or "hello" in user_msg:
         reply = "👋 Welcome to AgroScan! Send me a plant leaf image and I’ll tell you if it’s sick and what to do."
     else:
