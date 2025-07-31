@@ -109,19 +109,47 @@ async def predict(file: UploadFile = File(...)):
        # "treatment": treatment
     }
 
-@app.post("/hook", response_class=PlainTextResponse)
+# Whatsapp webhook endpoint
+@app.post("/hook")
 async def whatsapp_hook(request: Request):
     data = await request.form()
     user_msg = data.get("Body", "").strip().lower()
+    num_media = int(data.get("NumMedia", 0))
 
-    if "hi" in user_msg or "hello" in user_msg:
+    response = MessagingResponse()
+
+    if num_media > 0:
+        media_url = data.get("MediaUrl0")
+        content_type = data.get("MediaContentType0")
+
+        if "image" in content_type:
+            try:
+                # Download the image from Twilio
+                img_response = requests.get(media_url)
+                image = read_file_as_image(img_response.content)
+                img_batch = preprocess_image(Image.fromarray(image))
+
+                # Run prediction
+                prediction = MODEL.predict(img_batch)
+                predicted_class = CLASS_NAMES[np.argmax(prediction[0])]
+                confidence = np.max(prediction[0])
+
+                if confidence < 0.7:
+                    reply = "⚠️ Unable to confidently identify the disease. Please try a clearer image."
+                else:
+                    reply = f"🌿 Disease Detected: *{predicted_class}*\nConfidence: `{confidence:.2f}`"
+
+            except Exception as e:
+                reply = f"❌ Error processing image: {str(e)}"
+        else:
+            reply = "⚠️ Please send a valid image of a plant leaf."
+    elif "hi" in user_msg or "hello" in user_msg:
         reply = "👋 Welcome to AgroScan! Send me a plant leaf image and I’ll tell you if it’s sick and what to do."
     else:
         reply = "📸 Please upload a clear plant leaf image for analysis."
 
-    response = MessagingResponse()
     response.message(reply)
-    return PlainTextResponse(str(response))
+    return Response(content=str(response), media_type="application/xml")
 
 @app.get("/")
 def root():
