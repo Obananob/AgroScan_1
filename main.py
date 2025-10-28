@@ -15,6 +15,17 @@ from twilio.twiml.messaging_response import MessagingResponse
 
 app = FastAPI(title="AgroScan – AI Powered Plant Doctor")
 
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # allows all origins (you can restrict later)
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
 # MODEL LOAD 
 MODEL = tf.keras.models.load_model("agroscan_model.keras")
 CLASS_NAMES = [
