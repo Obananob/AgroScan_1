@@ -19,7 +19,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # allows all origins (you can restrict later)
+    allow_origins=["*"], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -50,10 +50,7 @@ TWILIO_SID = os.getenv("TWILIO_ACCOUNT_SID")
 TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
 twilio_client = Client(TWILIO_SID, TWILIO_AUTH_TOKEN)
 
-#  HUGGING FACE LLM 
-# HF_TOKEN = os.getenv("HF_TOKEN")
-# HF_MODEL = "featherless-ai/LawToken-0.3B-v2"  # use a light model <1B
-# hf_client = InferenceClient(model=HF_MODEL, token=HF_TOKEN)
+
 
 # UTILS 
 def preprocess_image(image: Image.Image):
@@ -65,20 +62,6 @@ def read_file_as_image(data) -> np.ndarray:
     image = np.array(Image.open(BytesIO(data)))
     return image
 
-# def generate_prompt(disease: str) -> str:
-#     return (
-#         f"Think carefully. A plant has been diagnosed with the disease: {disease}. "
-#         f"What is a simple, actionable, and locally relevant treatment recommendation? "
-#         f"Respond in the same language as the disease name."
-#     )
-
-# # def get_treatment_recommendation(disease: str) -> str:
-# #     prompt = generate_prompt(disease)
-# #     try:
-# #         response = hf_client.text_generation(prompt=prompt, max_new_tokens=150, temperature=0.6)
-# #         return response.strip()
-# #     except Exception as e:
-# #         return f"⚠️ LLM Error: {str(e)}"
 
 # ENDPOINTS 
 
@@ -99,29 +82,6 @@ async def predict(file: UploadFile = File(...)):
         "confidence": float(confidence)
     }
 
-# @app.post("/treat")
-# async def treat(file: UploadFile = File(...)):
-#     image = read_file_as_image(await file.read())
-#     img_batch = np.expand_dims(image, 0)
-
-#     prediction = MODEL.predict(img_batch)
-#     predicted_class = CLASS_NAMES[np.argmax(prediction[0])]
-#     confidence = np.max(prediction[0])
-
-#     if confidence < 0.7:
-#         return {
-#             "class": "Uncertain",
-#             "confidence": float(confidence),
-#            # "treatment": "⚠️ Please upload a clearer image."
-#         }
-
-#    treatment = get_treatment_recommendation(predicted_class)
-
-    return {
-        "class": predicted_class,
-        "confidence": float(confidence),
-       # "treatment": treatment
-    }
 
 # Whatsapp webhook endpoint
 @app.post("/hook")
